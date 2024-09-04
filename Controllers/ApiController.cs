@@ -19,6 +19,7 @@ namespace MovieApi.Controllers
             _logger = logger;
         }
 
+        [Route("search/movie")]
         public async Task<IActionResult> Index([FromServices] ITMDBService tMDBService,string title)
         {
             var movie = await tMDBService.SearchMovie(title);

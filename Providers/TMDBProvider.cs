@@ -13,28 +13,26 @@ namespace MovieApi.Providers
         private const string BASE_URL = "https://api.themoviedb.org/3";
         private readonly Dictionary<string, object> _cache = new(); //Recomendable Redis
 
-        public async Task<T?> SearchMovie<T>(string query)
+        public async Task<MovieTMDB?> SearchMovie(string query)
         {
             if (_cache.TryGetValue("search-movie-" + query, out var cachedResult))
             {
-                return (T?)cachedResult;
+                return (MovieTMDB)cachedResult;
             }
             using (var client = new HttpClient())
             {
                 string url = $"{BASE_URL}/search/movie?language=es-ES&page=1&query=${Uri.EscapeDataString(query)}";
 
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {BEARER}");
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
-
+                AddHeadersTMDB(client);
                 try
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
                     response.EnsureSuccessStatusCode();
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    var queryResult = JsonSerializer.Deserialize<SearchResultTMDB<List<T>>>(responseBody);
-                    if(queryResult != null)
+                    var queryResult = JsonSerializer.Deserialize<SearchResultTMDB<List<MovieTMDB>>>(responseBody);
+                    if (queryResult != null)
                     {
-                        var result = queryResult.Results.FirstOrDefault();
+                        var result = queryResult.Results?.FirstOrDefault();
 
                         _cache["search-movie-" + query] = result;
 
@@ -54,25 +52,24 @@ namespace MovieApi.Providers
             }
         }
 
-        public async Task<List<T>?> RecommendationsMovie<T>(int id)
+        public async Task<List<MovieTMDB>?> RecommendationsMovie(int id)
         {
             if (_cache.TryGetValue("recommendations-movie-" + id, out var cachedResult))
             {
-                return (List<T>?)cachedResult;
+                return (List<MovieTMDB>?)cachedResult;
             }
             using (var client = new HttpClient())
             {
                 string url = $"{BASE_URL}/movie/{id}/recommendations?language=es-ES&page=1";
 
-                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {BEARER}");
-                client.DefaultRequestHeaders.Add("Accept", "application/json");
+                AddHeadersTMDB(client);
 
                 try
                 {
                     HttpResponseMessage response = await client.GetAsync(url);
                     response.EnsureSuccessStatusCode();
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    var queryResult = JsonSerializer.Deserialize<SearchResultTMDB<List<T>>>(responseBody);
+                    var queryResult = JsonSerializer.Deserialize<SearchResultTMDB<List<MovieTMDB>>>(responseBody);
                     if (queryResult != null)
                     {
                         var result = queryResult.Results;
@@ -93,6 +90,12 @@ namespace MovieApi.Providers
                 }
                 return default;
             }
+        }
+
+        private void AddHeadersTMDB(HttpClient client)
+        {
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {BEARER}");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
         }
     }
 }

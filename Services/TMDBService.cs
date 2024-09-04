@@ -15,10 +15,10 @@ namespace MovieApi.Services
 
         public async Task<MovieViewModel?> SearchMovie(string query)
         {
-            var movie = await _tmdProvider.SearchMovie<MovieTMDB>(query);
+            var movie = await _tmdProvider.SearchMovie(query);
             if (movie != null)
             {
-                var recommendations = await _tmdProvider.RecommendationsMovie<MovieTMDB>(movie.Id);
+                var recommendations = await _tmdProvider.RecommendationsMovie(movie.Id);
                 var result = new MovieViewModel(movie);
                 if (recommendations != null)
                 {

@@ -1,8 +1,10 @@
-﻿namespace MovieApi.Providers
+﻿using MovieApi.Models.TMDB;
+
+namespace MovieApi.Providers
 {
     public interface ITMDBProvider
     {
-        Task<T?> SearchMovie<T>(string query);
-        Task<List<T>?> RecommendationsMovie<T>(int id);
+        Task<MovieTMDB?> SearchMovie(string query);
+        Task<List<MovieTMDB>?> RecommendationsMovie(int id);
     }
 }
